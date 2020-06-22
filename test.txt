@@ -1,2 +1,3 @@
-Git is a detributed version control system.
+Git is a detributed version control system_aa.
 Git is free software.
+It's too difficult.
