@@ -1,2 +1,1 @@
-# practice
-Nothing
+Practice is just a try.
