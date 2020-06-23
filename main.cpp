@@ -27,13 +27,15 @@ public:
         if (ch >= 'a' && ch <= 'z') {
             ch -= 32;
         }
+        if (status == S_NORMAL) {
+            if (ch == 'A') {
+                moveLeft();
+            }
+        }
         if (ch == 'Q') {
             status = S_QUIT;
         } else if (ch == 'R') {
             restart();
-        } else {
-            // 在各种状态中间遍历，测试界面
-            status = (status + 1) % 3;
         }
     }
     // 绘制游戏界面
@@ -73,7 +75,8 @@ public:
     void setTestData() {
         for (int i = 0; i < N; ++i) {
             for (int j = 0; j < N; ++j) {
-                data[i][j] = 16 << i << j;
+                data[i][j] = 16 << (i + j);
+                data[i][j] = 2 << (1 + rand() % 7);
                 /*
                 data[i][0] = 2;
                 data[i][1] = 4;
@@ -83,6 +86,36 @@ public:
         }
     }
 private:
+    // 向左边移动
+    void moveLeft() {
+        for (int i = 0; i < N; ++i) {
+            // 逐行处理
+            // 如果两个数字一样，当前可写入的位置
+            int currentWritePos = 0;
+            int lastValue = 0;
+            for (int j = 0; j < N; ++j) {
+                if (data[i][j] == 0) {
+                    continue;
+                }
+                if (lastValue == 0) {
+                    lastValue = data[i][j];
+                } else {
+                    if (lastValue == data[i][j]) {
+                        data[i][currentWritePos] = lastValue * 2;
+                        lastValue = 0;
+                    } else {
+                        data[i][currentWritePos] = lastValue;
+                        lastValue = data[i][j];
+                    }
+                    ++currentWritePos;
+                }
+                data[i][j] = 0;
+            }
+            if (lastValue != 0) {
+                data[i][currentWritePos] = lastValue;
+            }
+        }
+    }
     // 重新开始
     void restart() {
         for (int i = 0; i < N; ++i) {
@@ -93,6 +126,9 @@ private:
         randNew();
         randNew();
         status = S_NORMAL;
+        
+        // 测试moveLeft
+        setTestData();
     }
     // 随机产生一个新的数字
     bool randNew() {
