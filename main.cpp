@@ -9,6 +9,8 @@ using namespace std;
 #define N 4
 // 每个格子的字符长度
 #define WIDTH 5
+// 胜利条件
+#define TARGET 2048
 // 游戏状态
 #define S_FAIL 0
 #define S_WIN 1
@@ -53,6 +55,9 @@ public:
             }
             if (updated) {
                 randNew();
+                if (isOver()) {
+                    status = S_FAIL;
+                }
             }
         }
         if (ch == 'Q') {
@@ -86,8 +91,8 @@ public:
             }
         }
         // 提示文字
-        mvprintw(2 * N + 2, (5 * (N - 4) - 1) / 2, "W(UP),S(DOWN),A(LEFT),D(RIGHT),R(RESTART),Q(QUIT)");
-        mvprintw(2 * N + 3, 12 + 5 * (N - 4) / 2, "https://www.nowcoder.com");
+        mvprintw(2 * N + 2, (5 * (N - 4) - 1) / 2, "Game:2048 W(UP),S(DOWN),A(LEFT),D(RIGHT),R(RESTART),Q(QUIT)");
+        mvprintw(2 * N + 3, 12 + 5 * (N - 4) / 2, "By:MoonBird Thanks:XiangYuTongZhuo");
         if (status == S_WIN) {
             mvprintw( N, 5 * N / 2 - 1, " YOU WIN,PRESS R TO CONTINUE ");
         } else if (status == S_FAIL) {
@@ -99,7 +104,7 @@ public:
         for (int i = 0; i < N; ++i) {
             for (int j = 0; j < N; ++j) {
                 data[i][j] = 16 << (i + j);
-                data[i][j] = 2 << (1 + rand() % 7);
+                // data[i][j] = 2 << (1 + rand() % 7);
                 /*
                 data[i][0] = 2;
                 data[i][1] = 4;
@@ -109,6 +114,17 @@ public:
         }
     }
 private:
+    // 判断游戏已经结束
+    bool isOver() {
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < N; ++j) {
+                // 有空位或者相邻有一样的都可以继续
+                if ((j + 1 < N) && (data[i][j] * data[i][j+1] == 0 || data[i][j] == data[i][j+1])) return false;
+                if ((i + 1 < N) && (data[i][j] * data[i+1][j] == 0 || data[i][j] == data[i+1][j])) return false;
+            }
+        }
+        return true;
+    }
     // 向左边移动, 返回值表示盘面是否有发生变化
     bool moveLeft() {
         int tmp[N][N];
@@ -128,6 +144,9 @@ private:
                     if (lastValue == data[i][j]) {
                         data[i][currentWritePos] = lastValue * 2;
                         lastValue = 0;
+                        if (data[i][currentWritePos] == TARGET) {
+                            status = S_WIN;
+                        }
                     } else {
                         data[i][currentWritePos] = lastValue;
                         lastValue = data[i][j];
