@@ -19,9 +19,7 @@ public:
     Game2048() : status(S_NORMAL) {
         setTestData();
     }
-    int getStatus() { 
-        return status; 
-    }
+    int getStatus() { return status; }
     // 处理按键
     void processInput() {
         char ch = getch();
@@ -31,8 +29,10 @@ public:
         }
         if (ch == 'Q') {
             status = S_QUIT;
+        } else if (ch == 'R') {
+            restart();
         } else {
-            // 在各种状态中间遍历，仅仅用来测试界面
+            // 在各种状态中间遍历，测试界面
             status = (status + 1) % 3;
         }
     }
@@ -74,10 +74,46 @@ public:
         for (int i = 0; i < N; ++i) {
             for (int j = 0; j < N; ++j) {
                 data[i][j] = 16 << i << j;
+                /*
+                data[i][0] = 2;
+                data[i][1] = 4;
+                data[i][2] = 8;
+                data[i][3] = 16;*/
             }
         }
     }
 private:
+    // 重新开始
+    void restart() {
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < N; ++j) {
+                data[i][j] = 0;
+            }
+        }
+        randNew();
+        randNew();
+        status = S_NORMAL;
+    }
+    // 随机产生一个新的数字
+    bool randNew() {
+        vector<int> emptyPos;
+        // 把空位置先存起来
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < N; ++j) {
+                if (data[i][j] == 0) {
+                    emptyPos.push_back(i * N + j);
+                }
+            }
+        }
+        if (emptyPos.size() == 0) {
+            return false;
+        }
+        // 随机找个空位置
+        int value = emptyPos[rand() % emptyPos.size()];
+        // 10%的概率产生4
+        data[value / N][value % N] = rand() % 10 == 1 ? 4 : 2;
+        return true;
+    }
     // 左上角为（0，0），在指定的位置画一个字符
     void drawItem(int row, int col, char c) {
         move(row, col);
